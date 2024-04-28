@@ -1,38 +1,64 @@
 #include <iostream>
 
-#ifdef __cplusplus
-namespace Qsys {
-	extern "C" {
-#endif // __cplusplus
 
-		typedef double Qtype;
-		int maxSize; // ALWAYS INITIALISE BEFORE CALLING createQueue OTHERWISE YOU MAY END UP TRYING TO MAKE AN ARRAY THAT IS 7177728 ELEMENTS LONG.
-		Qtype** queue = nullptr; // ALWAYS CALL createQueue BEFORE CALLING ANY FUNCTIONS, OTHERWISE YOU MAY DEREFERENCE A NULL POINTER.
-		void createQueue() {
-			queue = new Qtype * [maxSize];
+
+namespace Qsys {
+	
+	template<typename Qtype> class Queue {
+		Qtype*** Qptr = &queue;
+		Qtype** queue = nullptr;
+		int maxSize;
+
+	public:
+		Qtype* operator[](int index){
+			_ASSERT((index >= 0) && (index < maxSize));
+			return *(queue + index);
+		}
+		
+	
+		Queue(int maxSize) {
+			queue = new Qtype* [maxSize];
 			_ASSERT(queue != nullptr);
+			
+			this->maxSize = maxSize;
 
 		}
-		void push() {
+		int set(int index, Qtype val) {
+			if (*(queue + index) != nullptr) {
+				**(queue + index) = val;
+				return 0;
+			}
+			return 1;
+		}
+		void MoveToFront() {
 			for (int timer = 0; timer < maxSize; timer++) {
-				
+				if ((*(queue + timer) != nullptr)) {
+					if (*(queue + (timer - 1)) == nullptr) {
+						for (int timer2 = timer; (*(queue + (timer2 - 1)) == nullptr) && !(queue + (timer2 - 1) < queue); timer2--) {
+							*(queue + (timer2 - 1)) = *(queue + timer2);
+							*(queue + timer2) = nullptr;
+						}
+					}
+				}
 			}
 		}
+		void push() {
+			delete *queue;
+			*queue = nullptr;
+			MoveToFront();
+			
+		}
 
-		Qtype*** Qptr = &queue;
 		
-		void fillQueue();
 		enum PUT_RESULT {
 			SUCCESS = 0, SLOT_FULL = 2, FAIL = 1
 		};
 
 
 		PUT_RESULT put(Qtype* heapAllocPtr) {
-			for (int timer = 0; timer < maxSize; timer++) {
-				if ((timer + 1) < maxSize) {
-
-				}
-			}
+			if (*(queue + (maxSize - 1)) != nullptr) return SLOT_FULL;
+			*(queue + (maxSize - 1)) = heapAllocPtr;
+			
 			return SUCCESS;
 		}
 		void fillQueue() {
@@ -42,26 +68,37 @@ namespace Qsys {
 
 		}
 
+		
+		~Queue() {
+			for (int timer = 0; timer < maxSize; timer++) delete *(queue + timer);
+			delete[] queue;
+		}
+	};
+	
 
-#ifdef __cplusplus
-	}
-#endif // __cplusplus
-#ifdef __cplusplus
+	
+	
+
 }
-#endif // __cplusplus
 
 
 
 
-#ifdef __cplusplus
+
+
 using namespace Qsys;
-#endif
+
 int main() {
-	maxSize = 10;
-	createQueue();
-	fillQueue();
-
-	put(new Qtype);
-
-
+	
+	Queue<int> queue(15);
+	queue.fillQueue();
+	queue.put(new int);
+	queue.MoveToFront();
+	queue.put(new int);
+	queue.MoveToFront();
+	queue.set(1, 93);
+	queue.set(0, 23); 
+	queue.push();
+	std::cout << *queue[0];
 }
+

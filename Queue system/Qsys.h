@@ -9,7 +9,7 @@ namespace Qsys {
 		Qtype*** Qptr = &queue;
 		Qtype** queue;
 		int maxSize;
-
+		bool circular;
 	public:
 		Qtype* operator[](int index) {
 			_ASSERT((index >= 0) && (index < maxSize));
@@ -17,11 +17,12 @@ namespace Qsys {
 		}
 
 
-		Queue(int maxSize) {
+		Queue(int maxSize, bool circular = false) {
 			queue = new Qtype * [maxSize];
 			_ASSERT(queue != nullptr);
-
+			
 			this->maxSize = maxSize;
+			this->circular = circular;
 
 		}
 		int set(int index, Qtype val) {
@@ -44,9 +45,17 @@ namespace Qsys {
 			}
 		}
 		void push() {
-			delete* queue;
+			Qtype* temp = *queue;
+			if (!circular) {
+				delete* queue;
+			}
 			*queue = nullptr;
 			MoveToFront();
+			if (circular) {
+				queue[maxSize - 1] = temp;
+			}
+			MoveToFront();
+			
 
 		}
 
@@ -71,7 +80,10 @@ namespace Qsys {
 
 
 		~Queue() {
-			for (int timer = 0; timer < maxSize; timer++) delete* (queue + timer);
+			for (int timer = 0; timer < maxSize; timer++) {
+				if (queue[timer] != nullptr)
+					delete queue[timer];
+			}
 			delete[] queue;
 		}
 	};

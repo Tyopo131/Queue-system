@@ -1,20 +1,20 @@
 #include "Qsys.h"
 
-using namespace Qsys;
+
+
 
 int main() {
+	Qsys::Queue<std::string> fruit(15, "bhkfapr'pgnbvaelrng", true);
+	fruit.fillQueue();
+	fruit.put(new std::string("apple"));
+	fruit.put(new std::string("strawberries"));
+	fruit.put(new std::string("blueberries"));
+	fruit.put(new std::string("satsumas"));
+	fruit.put(new std::string("watermelon"));
+	fruit.put(new std::string("bananas"));
+	fruit.push(4);
 	
-	Queue<int> queue(15, true);
-	queue.fillQueue();
-	queue.put(new int);
-	queue.MoveToFront();
-	queue.put(new int);
-	queue.MoveToFront();
-	queue.set(1, 93);
-	queue.set(0, 23); 
-	queue.push();
-	std::cout << *queue[0];
-	std::cout << *queue[1];
-	std::cin.get();
+	
+	std::cout << fruit;
 }
 
